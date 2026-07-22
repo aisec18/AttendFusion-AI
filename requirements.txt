@@ -2,26 +2,34 @@ streamlit
 
 numpy
 pandas
+
 #for face recognition
 scikit-learn
 
 dlib-bin
 
-git+https://github.com/ageitgey/face_recognition.git
+# Use a fork of face_recognition that depends on dlib-bin instead of dlib
+# (the original ageitgey/face_recognition pulls dlib which tries to compile from source and OOMs on Streamlit Cloud)
+face_recognition @ git+https://github.com/thetoby9944/face_recognition
+
 setuptools<70.0.0
 
 #databases
 supabase
 bcrypt
+
 #qr code generation
 segno
+
 #image processing
 pillow
 
-
-
+#audio processing
 librosa
+scipy
 
-#resemblyzer
+#voice recognition - requires torch as a dependency
+torch
+resemblyzer
 
 webrtcvad-wheels

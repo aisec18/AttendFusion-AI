@@ -40,15 +40,16 @@ def style_base_layout():
                 visibility: hidden;
               }
                
-                padding-top: 1.5rem !important;
-
-                }
+               .block-container {
+                 padding-top: 1.5rem !important;
+               }
 
                 h1{
                     font-family: 'Climate Crisis', sans-serif !important;
-                    font-size: 3.5rem !important;
+                    font-size: 2.8rem !important;
                     line-height: 1.1 !important;
                     margin-bottom: 0rem !important;
+                    white-space: nowrap !important;
                 }
                 h2{
                     font-family: 'Climate Crisis', sans-serif !important;
@@ -76,7 +77,7 @@ def style_base_layout():
                     border: none !important;
                     transition: transform 0.25s ease-in-out !important;
                     }
-                button[kind ="tertiary"]){
+                button[kind="tertiary"] {
                     border-radius: 1.5rem !important;
                     background-color: black !important;
                     color: white !important;

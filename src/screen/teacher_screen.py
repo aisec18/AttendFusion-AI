@@ -27,7 +27,7 @@ def teacher_screen():
 
 def teacher_dashboard():
     teacher_data = st.session_state.teacher_data
-    c1, c2 = st.columns(2, vertical_alignment='center', gap='xxlarge')
+    c1, c2 = st.columns([1.5, 1], vertical_alignment='center', gap='large')
     with c1:
         header_dashboard()
     
@@ -131,7 +131,7 @@ def teacher_tab_take_attendance():
                     if not  enrolled_students:
                         st.warning("No students in this course")
                     else:
-                        results,attendace_to_log=[],[]
+                        results,attendance_to_log=[],[]
                         current_timestamp=datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
                         for node in enrolled_students:
@@ -145,17 +145,17 @@ def teacher_tab_take_attendance():
                                 "Source": ",".join(sources) if is_present else "-",
                                 "Status":"Present" if is_present else "Absent"
                             })
-                            attendace_to_log.append({
+                            attendance_to_log.append({
                                 'student_id': student['student_id'],
                                 'subject_id': selected_subject_id,
                                 'timestamp': current_timestamp,
                                 'is_present': bool(is_present)
-})
-                    attendance_result_dialog(pd.DataFrame(results),attendace_to_log)
+                            })
+                        attendance_result_dialog(pd.DataFrame(results),attendance_to_log)
                             
     with c3:
-            st.button('Use Voice Attendance',type='primary',width='stretch')
-            voice_attendance_dialog(selected_subject_id)
+            if st.button('Use Voice Attendance',type='primary',width='stretch'):
+                voice_attendance_dialog(selected_subject_id)
 
 def teacher_tab_manage_subject():
     teacher_id=st.session_state.teacher_data['teacher_id']
@@ -166,26 +166,24 @@ def teacher_tab_manage_subject():
         if st.button('Create new subject',width='content'):
             create_subject_dialog(teacher_id)
 
-    st.header("Manage Subjects")
     subjects=get_teacher_subject(teacher_id)
     if subjects:
         for sub in subjects:
-            
-                stats = [
-                            ("👥", "Students", sub['total_students']),
-                            ("📚", "Classes", sub['total_classes']),
-                        ]
-                def share_btn():
-                    if st.button(f"Share Code {sub['name']}",key=f"share_{sub['subject_code']}",type='secondary',icon=':material/share:'):
-                        share_subject_dialog(sub['name'],sub['subject_code'])
-                    st.space()
-                subject_card(
-                    name=sub['name'],
-                    code=sub['subject_code'],
-                    section=sub['section'],
-                    stats=stats,
-                    footer_callback=share_btn
-                )
+            stats = [
+                ("👥", "Students", sub['total_students']),
+                ("📚", "Classes", sub['total_classes']),
+            ]
+            def share_btn(s=sub):
+                if st.button(f"Share Code {s['name']}",key=f"share_{s['subject_code']}",type='secondary',icon=':material/share:'):
+                    share_subject_dialog(s['name'],s['subject_code'])
+                st.space()
+            subject_card(
+                name=sub['name'],
+                code=sub['subject_code'],
+                section=sub['section'],
+                stats=stats,
+                footer_callback=share_btn
+            )
     else:
         st.info("No subject found,create one above")
 
@@ -203,7 +201,7 @@ def teacher_tab_attendance_records():
         ts=r.get('timestamp')
         data.append({
             "ts_group":ts.split(".")[0] if ts else None,
-            "Time":datetime.fromisformat(ts).strftime("%Y-%m-%d %I:%M %p") if ts else "N'A", 
+            "Time":datetime.fromisoformat(ts).strftime("%Y-%m-%d %I:%M %p") if ts else "N'A", 
             "Subject":r['subjects']['name'],
             "Subject_Code":r['subjects']['subject_code'],
             "is_present":bool(r.get('is_present',False))
@@ -211,7 +209,7 @@ def teacher_tab_attendance_records():
     df=pd.DataFrame(data)
     summary=(
         df.groupby(['ts_group','Time',"Subject","Subject_Code","is_present"]).agg(
-            Present_count=('is_present','sum'),
+            Present_Count=('is_present','sum'),
             Total_Count=('is_present','count')
         ).reset_index()
     )
@@ -219,6 +217,8 @@ def teacher_tab_attendance_records():
     "✅ " + summary['Present_Count'].astype(str) + " /"
     + summary['Total_Count'].astype(str) + " Students"
     )
+
+    summary = summary.rename(columns={"Subject_Code": "Subject Code"})
 
     display_df = (
         summary.sort_values(by='ts_group', ascending=False)
@@ -238,7 +238,7 @@ def login_teacher(username, password):
         return True
 
 def teacher_screen_login():
-    c1, c2 = st.columns(2, vertical_alignment='center', gap='xxlarge')
+    c1, c2 = st.columns([1.5, 1], vertical_alignment='center', gap='large')
     with c1:
         header_dashboard()
     
@@ -266,7 +266,7 @@ def teacher_screen_login():
                 time.sleep(1)
                 st.rerun()
             else:
-                st.error("Invalid username")
+                st.error("Invalid username or password")
 
 
     with btnc2:
@@ -296,7 +296,7 @@ def register_teacher(teacher_username, teacher_name, teacher_password, teacher_p
   
 
 def teacher_screen_register():
-    c1, c2 = st.columns(2, vertical_alignment='center', gap='xxlarge')
+    c1, c2 = st.columns([1.5, 1], vertical_alignment='center', gap='large')
     with c1:
         header_dashboard()
     with c2:

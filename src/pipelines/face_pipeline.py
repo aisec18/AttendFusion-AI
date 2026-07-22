@@ -47,14 +47,14 @@ def get_trained_model():
             y.append(student.get('student_id'))
     
     if len(X)==0:
-        return 0
+        return None
     
     clf=SVC(kernel='linear',probability=True,class_weight='balanced')
 
     try:
         clf.fit(X,y)
     except ValueError:
-        pass
+        return None
 
     return {'clf':clf,'X':X,"y":y}
 

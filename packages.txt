@@ -2,3 +2,6 @@ build-essential
 cmake
 libopenblas-dev
 liblapack-dev
+libx11-dev
+libsndfile1
+ffmpeg
