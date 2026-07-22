@@ -18,12 +18,26 @@ def teacher_screen():
     style_background_dashboard()
     style_base_layout()
 
+    # Initialize login mode if not present
+    if "teacher_login_type" not in st.session_state:
+        st.session_state.teacher_login_type = "login"
+
+    # If already logged in
     if "teacher_data" in st.session_state:
         teacher_dashboard()
-    elif 'teacher_login_type' not in st.session_state or st.session_state.teacher_login_type == "login":
+
+    # Show login page
+    elif st.session_state.teacher_login_type == "login":
         teacher_screen_login()
+
+    # Show register page
     elif st.session_state.teacher_login_type == "register":
         teacher_screen_register()
+
+    # Fallback
+    else:
+        st.session_state.teacher_login_type = "login"
+        st.rerun()
 
 def teacher_dashboard():
     teacher_data = st.session_state.teacher_data
@@ -239,52 +253,51 @@ def login_teacher(username, password):
     return False
 
 def teacher_screen_login():
-    c1, c2 = st.columns([1.5, 1], vertical_alignment='center', gap='large')
+    
+    c1, c2 = st.columns([1.5, 1], vertical_alignment="center", gap="large")
+
     with c1:
         header_dashboard()
-    
-    # Unique key for login screen back button
+
     with c2:
-        if st.button("Go back to Home", type='secondary', key='login_back_btn', shortcut="control+backspace"):
-           st.session_state['login_type'] = None
-           st.rerun()
-
-    # Centered header using HTML markdown
-    st.header('Login Using password', text_alignment='center')
-    st.space()
-    
-    teacher_username = st.text_input("Enter your username", placeholder="Enter your username", label_visibility='collapsed', key='reg_teacher_username')
-    st.write("") 
-    
-    teacher_name = st.text_input("Enter your name", placeholder="Enter your name", label_visibility='collapsed', key='reg_teacher_name')
-    teacher_password = st.text_input("Enter your password", placeholder="Enter your password", label_visibility='collapsed', key='reg_teacher_password', type='password')
-    teacher_pass_confirm = st.text_input("Confirm your password", placeholder="Confirm your password", label_visibility='collapsed', key='reg_teacher_confirm_password', type='password')
-
-    btnc1, btnc2 = st.columns(2)
-    with btnc1:
-        if st.button("Register", type='secondary', key='teacher_register_submit_btn', shortcut="control+enter", use_container_width=True):
-            # Read directly from session_state for reliability —
-            # avoids stale values when button shortcut triggers rerun before widgets update
-            _username = st.session_state.get('reg_teacher_username', '').strip()
-            _name = st.session_state.get('reg_teacher_name', '').strip()
-            _password = st.session_state.get('reg_teacher_password', '')
-            _confirm = st.session_state.get('reg_teacher_confirm_password', '')
-            success, message = register_teacher(_username, _name, _password, _confirm)
-            if success:
-                st.success(message)
-                import time
-                time.sleep(2)
-                st.session_state.teacher_login_type = "login"
-                st.rerun()
-            else:
-                st.error(message)
-    with btnc2:
-        # Removed duplicate shortcut="control+backspace" — it conflicted with the "Go back to Home" button above
-        if st.button("Login Instead", type='primary', key='teacher_goto_login_btn', use_container_width=True):
-            st.session_state.teacher_login_type = 'login'
+        if st.button("Go back to Home", type="secondary"):
+            st.session_state.login_type = None
             st.rerun()
-            
-    footer_dashboard()  
+
+    st.header("Teacher Login")
+
+    username = st.text_input(
+        "Username",
+        placeholder="Enter username",
+        key="teacher_login_username"
+    )
+
+    password = st.text_input(
+        "Password",
+        placeholder="Enter password",
+        type="password",
+        key="teacher_login_password"
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("Login", type="primary", use_container_width=True):
+
+            if login_teacher(username, password):
+                st.success("Login Successful")
+                st.rerun()
+
+            else:
+                st.error("Invalid Username or Password")
+
+    with col2:
+        if st.button("Create Account", use_container_width=True):
+
+            st.session_state.teacher_login_type = "register"
+            st.rerun()
+
+    footer_dashboard()
     
 def register_teacher(teacher_username, teacher_name, teacher_password, teacher_pass_confirm):
     if not teacher_username or not teacher_name or not teacher_password or not teacher_pass_confirm:
