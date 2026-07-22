@@ -253,37 +253,36 @@ def teacher_screen_login():
     st.header('Login Using password', text_alignment='center')
     st.space()
     
-    with st.form("register_form", border=False):
-        teacher_username = st.text_input("Enter your username", placeholder="Enter your username", label_visibility='collapsed', key='reg_teacher_username')
-        st.write("") 
-        
-        teacher_name = st.text_input("Enter your name", placeholder="Enter your name", label_visibility='collapsed', key='reg_teacher_name')
-        teacher_password = st.text_input("Enter your password", placeholder="Enter your password", label_visibility='collapsed', key='reg_teacher_password', type='password')
-        teacher_pass_confirm = st.text_input("Confirm your password", placeholder="Confirm your password", label_visibility='collapsed', key='reg_teacher_confirm_password', type='password')
+    teacher_username = st.text_input("Enter your username", placeholder="Enter your username", label_visibility='collapsed', key='reg_teacher_username')
+    st.write("") 
+    
+    teacher_name = st.text_input("Enter your name", placeholder="Enter your name", label_visibility='collapsed', key='reg_teacher_name')
+    teacher_password = st.text_input("Enter your password", placeholder="Enter your password", label_visibility='collapsed', key='reg_teacher_password', type='password')
+    teacher_pass_confirm = st.text_input("Confirm your password", placeholder="Confirm your password", label_visibility='collapsed', key='reg_teacher_confirm_password', type='password')
 
-        btnc1, btnc2 = st.columns(2)
-        with btnc1:
-            submitted = st.form_submit_button("Register", type='secondary', use_container_width=True, shortcut="control+enter")
-        with btnc2:
-            login_instead = st.form_submit_button("Login Instead", type='primary', use_container_width=True)
-
-    if submitted:
-        success, message = register_teacher(
-            teacher_username.strip(), teacher_name.strip(),
-            teacher_password, teacher_pass_confirm
-        )
-        if success:
-            st.success(message)
-            import time
-            time.sleep(2)
-            st.session_state.teacher_login_type = "login"
+    btnc1, btnc2 = st.columns(2)
+    with btnc1:
+        if st.button("Register", type='secondary', key='teacher_register_submit_btn', shortcut="control+enter", use_container_width=True):
+            # Read directly from session_state for reliability —
+            # avoids stale values when button shortcut triggers rerun before widgets update
+            _username = st.session_state.get('reg_teacher_username', '').strip()
+            _name = st.session_state.get('reg_teacher_name', '').strip()
+            _password = st.session_state.get('reg_teacher_password', '')
+            _confirm = st.session_state.get('reg_teacher_confirm_password', '')
+            success, message = register_teacher(_username, _name, _password, _confirm)
+            if success:
+                st.success(message)
+                import time
+                time.sleep(2)
+                st.session_state.teacher_login_type = "login"
+                st.rerun()
+            else:
+                st.error(message)
+    with btnc2:
+        # Removed duplicate shortcut="control+backspace" — it conflicted with the "Go back to Home" button above
+        if st.button("Login Instead", type='primary', key='teacher_goto_login_btn', use_container_width=True):
+            st.session_state.teacher_login_type = 'login'
             st.rerun()
-        else:
-            st.error(message)
-
-    if login_instead:
-        st.session_state.teacher_login_type = 'login'
-        st.rerun()
             
     footer_dashboard()  
     
