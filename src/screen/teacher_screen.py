@@ -236,6 +236,7 @@ def login_teacher(username, password):
         st.session_state.teacher_data=teacher
         st.session_state.is_logged_in=True
         return True
+    return False
 
 def teacher_screen_login():
     c1, c2 = st.columns([1.5, 1], vertical_alignment='center', gap='large')
@@ -270,7 +271,7 @@ def teacher_screen_login():
 
 
     with btnc2:
-        if st.button("Register Instead", type='primary', key='teacher_goto_register_btn', shortcut="control+backspace", use_container_width=True):
+        if st.button("Register Instead", type='primary', key='teacher_goto_register_btn', use_container_width=True):
             st.session_state.teacher_login_type = 'register'
             st.rerun()
             
@@ -318,19 +319,26 @@ def teacher_screen_register():
 
     btnc1, btnc2 = st.columns(2)
     with btnc1:
-        if st.button("Register", type='secondary', key='teacher_register_submit_btn', shortcut="control+enter", use_container_width=True):     
-            success,message=register_teacher(teacher_username, teacher_name, teacher_password, teacher_pass_confirm)
+        if st.button("Register", type='secondary', key='teacher_register_submit_btn', shortcut="control+enter", use_container_width=True):
+            # Read directly from session_state for reliability —
+            # avoids stale values when button shortcut triggers rerun before widgets update
+            _username = st.session_state.get('reg_teacher_username', '').strip()
+            _name = st.session_state.get('reg_teacher_name', '').strip()
+            _password = st.session_state.get('reg_teacher_password', '')
+            _confirm = st.session_state.get('reg_teacher_confirm_password', '')
+            success, message = register_teacher(_username, _name, _password, _confirm)
             if success:
                 st.success(message)
                 import time
                 time.sleep(2)
-                st.session_state.teacher_login_type="login"
+                st.session_state.teacher_login_type = "login"
                 st.rerun()
             else:
                 st.error(message)
     with btnc2:
-        if st.button("Login Instead", type='primary', key='teacher_goto_login_btn', shortcut="control+backspace", use_container_width=True):
+        # Removed duplicate shortcut="control+backspace" — it conflicted with the "Go back to Home" button above
+        if st.button("Login Instead", type='primary', key='teacher_goto_login_btn', use_container_width=True):
             st.session_state.teacher_login_type = 'login'
             st.rerun()
-            
+
     footer_dashboard()
