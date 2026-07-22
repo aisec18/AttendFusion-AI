@@ -1,2 +1,2 @@
 cmake
-python3-dlib
+build-essential
