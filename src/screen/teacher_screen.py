@@ -253,27 +253,37 @@ def teacher_screen_login():
     st.header('Login Using password', text_alignment='center')
     st.space()
     
-    teacher_username = st.text_input("Enter your username", placeholder="Enter your username", label_visibility='collapsed', key='login_teacher_username')
-    st.write("") 
-    
-    teacher_password = st.text_input("Enter your password", placeholder="Enter your password", label_visibility='collapsed', key='login_teacher_password', type='password')
-    
-    btnc1, btnc2 = st.columns(2)
-    with btnc1:
-        if st.button("Login", type='secondary', key='teacher_login_submit_btn', shortcut="control+enter", use_container_width=True):
-            if login_teacher(teacher_username,teacher_password):
-                st.toast("welcome back!",icon="👋")
-                import time 
-                time.sleep(1)
-                st.rerun()
-            else:
-                st.error("Invalid username or password")
+    with st.form("register_form", border=False):
+        teacher_username = st.text_input("Enter your username", placeholder="Enter your username", label_visibility='collapsed', key='reg_teacher_username')
+        st.write("") 
+        
+        teacher_name = st.text_input("Enter your name", placeholder="Enter your name", label_visibility='collapsed', key='reg_teacher_name')
+        teacher_password = st.text_input("Enter your password", placeholder="Enter your password", label_visibility='collapsed', key='reg_teacher_password', type='password')
+        teacher_pass_confirm = st.text_input("Confirm your password", placeholder="Confirm your password", label_visibility='collapsed', key='reg_teacher_confirm_password', type='password')
 
+        btnc1, btnc2 = st.columns(2)
+        with btnc1:
+            submitted = st.form_submit_button("Register", type='secondary', use_container_width=True, shortcut="control+enter")
+        with btnc2:
+            login_instead = st.form_submit_button("Login Instead", type='primary', use_container_width=True)
 
-    with btnc2:
-        if st.button("Register Instead", type='primary', key='teacher_goto_register_btn', use_container_width=True):
-            st.session_state.teacher_login_type = 'register'
+    if submitted:
+        success, message = register_teacher(
+            teacher_username.strip(), teacher_name.strip(),
+            teacher_password, teacher_pass_confirm
+        )
+        if success:
+            st.success(message)
+            import time
+            time.sleep(2)
+            st.session_state.teacher_login_type = "login"
             st.rerun()
+        else:
+            st.error(message)
+
+    if login_instead:
+        st.session_state.teacher_login_type = 'login'
+        st.rerun()
             
     footer_dashboard()  
     
