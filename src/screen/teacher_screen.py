@@ -277,23 +277,25 @@ def teacher_screen_login():
     footer_dashboard()  
     
 def register_teacher(teacher_username, teacher_name, teacher_password, teacher_pass_confirm):
+    teacher_username = teacher_username.strip() if teacher_username else ""
+    teacher_name = teacher_name.strip() if teacher_name else ""
+    teacher_password = teacher_password.strip() if teacher_password else ""
+    teacher_pass_confirm = teacher_pass_confirm.strip() if teacher_pass_confirm else ""
+
     if not teacher_username or not teacher_name or not teacher_password or not teacher_pass_confirm:
         return False, "Please fill in all fields."
     
     if check_teacher_exists(teacher_username):
-        return False,"Username already taken"
+        return False, "Username already taken"
     
     if teacher_password != teacher_pass_confirm:
         return False, "Passwords do not match."
     
     try:
-        create_teacher(teacher_username,  teacher_password,teacher_name)
+        create_teacher(teacher_username, teacher_password, teacher_name)
         return True, "Registration successful!"
     except Exception as e:
-        return False,"Unexpected error"
-    # Here you would typically add code to save the teacher's information to a database
-    # For this example, we'll just simulate a successful registration
-  
+        return False, f"Error: {str(e)}"
 
 def teacher_screen_register():
     c1, c2 = st.columns([1.5, 1], vertical_alignment='center', gap='large')
@@ -302,7 +304,7 @@ def teacher_screen_register():
     with c2:
         # Unique key for register screen back button
         if st.button("Go back to Home", type='secondary', key='register_back_btn', shortcut="control+backspace"):
-            st.session_state['teacher_login_type'] = 'login'  # fixed: was setting wrong key 'login_type'
+            st.session_state['login_type'] = None
             st.rerun()
 
     # Centered header using HTML markdown            
@@ -321,7 +323,6 @@ def teacher_screen_register():
     btnc1, btnc2 = st.columns(2)
     with btnc1:
         if st.button("Register", type='secondary', key='teacher_register_submit_btn', shortcut="control+enter", use_container_width=True):
-            # Read values directly from session_state to get the correct values after rerun
             teacher_username = st.session_state.get('reg_teacher_username', '')
             teacher_name = st.session_state.get('reg_teacher_name', '')
             teacher_password = st.session_state.get('reg_teacher_password', '')
@@ -336,7 +337,7 @@ def teacher_screen_register():
             else:
                 st.error(message)
     with btnc2:
-        if st.button("Login Instead", type='primary', key='teacher_goto_login_btn', shortcut="control+backspace", use_container_width=True):
+        if st.button("Login Instead", type='primary', key='teacher_goto_login_btn', use_container_width=True):
             st.session_state.teacher_login_type = 'login'
             st.rerun()
             
