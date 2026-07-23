@@ -302,29 +302,36 @@ def teacher_screen_register():
     with c2:
         # Unique key for register screen back button
         if st.button("Go back to Home", type='secondary', key='register_back_btn', shortcut="control+backspace"):
-            st.session_state['login_type'] = None
+            st.session_state['teacher_login_type'] = 'login'  # fixed: was setting wrong key 'login_type'
             st.rerun()
 
     # Centered header using HTML markdown            
     st.markdown("<h2 style='text-align: center;'>Register Your Profile</h2>", unsafe_allow_html=True)
     st.write("") 
     
-    teacher_username = st.text_input("Enter your username", placeholder="Enter your username", label_visibility='collapsed', key='reg_teacher_username')
+    st.text_input("Enter your username", placeholder="Enter your username", label_visibility='collapsed', key='reg_teacher_username')
     st.write("") 
     
-    teacher_name = st.text_input("Enter your name", placeholder="Enter your name", label_visibility='collapsed', key='reg_teacher_name')
-    teacher_password = st.text_input("Enter your password", placeholder="Enter your password", label_visibility='collapsed', key='reg_teacher_password', type='password')
-    teacher_pass_confirm = st.text_input("Confirm your password", placeholder="Confirm your password", label_visibility='collapsed', key='reg_teacher_confirm_password', type='password')
+    st.text_input("Enter your name", placeholder="Enter your name", label_visibility='collapsed', key='reg_teacher_name')
+    st.write("") 
+    st.text_input("Enter your password", placeholder="Enter your password", label_visibility='collapsed', key='reg_teacher_password', type='password')
+    st.write("") 
+    st.text_input("Confirm your password", placeholder="Confirm your password", label_visibility='collapsed', key='reg_teacher_confirm_password', type='password')
 
     btnc1, btnc2 = st.columns(2)
     with btnc1:
-        if st.button("Register", type='secondary', key='teacher_register_submit_btn', shortcut="control+enter", use_container_width=True):     
-            success,message=register_teacher(teacher_username, teacher_name, teacher_password, teacher_pass_confirm)
+        if st.button("Register", type='secondary', key='teacher_register_submit_btn', shortcut="control+enter", use_container_width=True):
+            # Read values directly from session_state to get the correct values after rerun
+            teacher_username = st.session_state.get('reg_teacher_username', '')
+            teacher_name = st.session_state.get('reg_teacher_name', '')
+            teacher_password = st.session_state.get('reg_teacher_password', '')
+            teacher_pass_confirm = st.session_state.get('reg_teacher_confirm_password', '')
+            success, message = register_teacher(teacher_username, teacher_name, teacher_password, teacher_pass_confirm)
             if success:
                 st.success(message)
                 import time
                 time.sleep(2)
-                st.session_state.teacher_login_type="login"
+                st.session_state.teacher_login_type = "login"
                 st.rerun()
             else:
                 st.error(message)
