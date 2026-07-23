@@ -2,7 +2,7 @@ import streamlit as st
 from src.ui.base_layout import style_background_dashboard, style_base_layout
 from src.components.header import header_dashboard
 from src.components.footer import footer_dashboard
-from src.database.db import check_teacher_exists,create_teacher,teacher_login,get_teacher_subject,create_subject,get_attendance_for_teacher
+from src.database.db import check_teacher_exists,create_teacher,teacher_login,get_teacher_subject,create_subject,get_attendance_for_teacher,delete_subject
 from src.components.dialog_create_subject import create_subject_dialog
 from src.components.subject_card import subject_card
 from src.components.dialog_add_photos import add_photos_dialog
@@ -122,9 +122,11 @@ def teacher_tab_take_attendance():
 
                         if detected:
                             for sid in detected.keys():
-                                student_id=int(sid)
-
-                                all_detected_ids.setdefault(student_id,[]).append(f"Photo {idx+1}")
+                                try:
+                                    student_id=int(sid)
+                                    all_detected_ids.setdefault(student_id,[]).append(f"Photo {idx+1}")
+                                except (ValueError, TypeError):
+                                    pass
                     enrolled_res=supabase.table('subject_students').select("*,students(*)").eq('subject_id',selected_subject_id).execute()
                     enrolled_students=enrolled_res.data
 
@@ -135,8 +137,14 @@ def teacher_tab_take_attendance():
                         current_timestamp=datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
                         for node in enrolled_students:
-                            student=node['students']
-                            sources=all_detected_ids.get(int(student['student_id']),[])
+                            student=node.get('students')
+                            if not student:
+                                continue
+                            try:
+                                sid_val=int(student['student_id'])
+                            except (ValueError, TypeError):
+                                sid_val=student['student_id']
+                            sources=all_detected_ids.get(sid_val,[])
                             is_present=len(sources)>0
 
                             results.append({
@@ -174,8 +182,15 @@ def teacher_tab_manage_subject():
                 ("📚", "Classes", sub['total_classes']),
             ]
             def share_btn(s=sub):
-                if st.button(f"Share Code {s['name']}",key=f"share_{s['subject_code']}",type='secondary',icon=':material/share:'):
-                    share_subject_dialog(s['name'],s['subject_code'])
+                bcol1, bcol2 = st.columns(2)
+                with bcol1:
+                    if st.button(f"Share Code", key=f"share_{s['subject_id']}", type='secondary', icon=':material/share:', width='stretch'):
+                        share_subject_dialog(s['name'], s['subject_code'])
+                with bcol2:
+                    if st.button(f"Delete Subject", key=f"delete_{s['subject_id']}", type='tertiary', icon=':material/delete:', width='stretch'):
+                        delete_subject(s['subject_id'])
+                        st.toast(f"Subject '{s['name']}' deleted successfully")
+                        st.rerun()
                 st.space()
             subject_card(
                 name=sub['name'],
@@ -305,6 +320,7 @@ def teacher_screen_register():
         # Unique key for register screen back button
         if st.button("Go back to Home", type='secondary', key='register_back_btn', shortcut="control+backspace"):
             st.session_state['login_type'] = None
+            st.session_state['teacher_login_type'] = 'login'
             st.rerun()
 
     # Centered header using HTML markdown            

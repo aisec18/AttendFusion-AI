@@ -51,7 +51,9 @@ def student_dashboard():
 
     cols=st.columns(2)
     for i,sub_node in enumerate(subjects):
-        sub=sub_node['subjects']
+        sub=sub_node.get('subjects')
+        if not sub:
+            continue
         sid=sub['subject_id']
 
         stats=stats_map.get(sid,{"total":0,"attended":0})

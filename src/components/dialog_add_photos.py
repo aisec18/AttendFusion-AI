@@ -31,10 +31,11 @@ def add_photos_dialog():
     if st.session_state.photo_tab=='upload':
         uploaded_files=st.file_uploader('choose image files',type=['jpg','png','jpeg'],accept_multiple_files=True,key='dialog_upload')
         if uploaded_files:
-            for f in uploaded_files:
-                st.session_state.attendance_images.append(Image.open(f))
-            st.toast('Photos Uploaded Successfully')
-            st.rerun()
+            if st.button('Add Selected Photos',type='primary',width='stretch'):
+                for f in uploaded_files:
+                    st.session_state.attendance_images.append(Image.open(f))
+                st.toast('Photos Uploaded Successfully')
+                st.rerun()
     st.divider()
     if st.button('Done',type='primary',width='stretch'):
         st.rerun()
